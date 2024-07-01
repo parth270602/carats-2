@@ -1,50 +1,116 @@
-import "package:flutter/material.dart";
-import "package:cloud_firestore/cloud_firestore.dart";
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
+class CarousalPage extends StatefulWidget {
+  @override
+  _CarousalPageState createState() => _CarousalPageState();
+}
 
-class CarousalPage extends StatelessWidget {
-  final FirebaseFirestore _firestore=FirebaseFirestore.instance;
+class _CarousalPageState extends State<CarousalPage> {
+  final CarouselController _carouselController = CarouselController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  int _current = 0;
+  List<String> _imageUrls = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCarouselImages();
+  }
+
+  Future<void> _fetchCarouselImages() async {
+    try {
+      QuerySnapshot snapshot = await _firestore.collection('carousal').get();
+      List<String> imageUrls = snapshot.docs.map((doc) => doc['imageUrl'] as String).toList();
+      setState(() {
+        _imageUrls = imageUrls;
+      });
+    } catch (e) {
+      print('Error fetching images: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title:Text('Carousal Page'),
-      ),
-      body:Center(
-        child: FutureBuilder<QuerySnapshot>(
-          future: _firestore.collection('carousal').get(),
-          builder: (context,snapshot){
-            if(snapshot.connectionState==ConnectionState.waiting){
-              return CircularProgressIndicator();
-            }
-            if (snapshot.hasError){
-              return Text('Error ${snapshot.error}');
-            }
-            if(!snapshot.hasData || snapshot.data!.docs.isEmpty){
-              return Text('No images available');
-            }
-            List<String> imageUrls=snapshot.data!.docs.map((doc) =>doc['imageUrl'] as String).toList();
+    double height = MediaQuery.of(context).size.height;
 
-
-            return CarouselSlider(
-              items: imageUrls.map((url){
-                return Image.network(url,fit:BoxFit.cover);
-              }).toList(), 
-              options: CarouselOptions(
-                height: 300.0,
-                enlargeCenterPage: true,
-                autoPlay: true,
-                aspectRatio: 16/9,
-                autoPlayCurve: Curves.fastOutSlowIn,
-                enableInfiniteScroll: true,
-                autoPlayAnimationDuration: Duration(milliseconds: 800),
-                viewportFraction: 0.8
-              ),
-              );
-          },
-        ),
-        )
-    );
+    return _imageUrls.isEmpty
+        ? CircularProgressIndicator()
+        : SizedBox(
+            height: height * 0.3,  // Set a fixed height
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CarouselSlider(
+                  carouselController: _carouselController,
+                  options: CarouselOptions(
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    enableInfiniteScroll: true,
+                    viewportFraction: 0.8,
+                    onPageChanged: (index, reason) {
+                      setState(() {
+                        _current = index;
+                      });
+                    },
+                  ),
+                  items: _imageUrls.map((url) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return Image.network(url, fit: BoxFit.contain);
+                      },
+                    );
+                  }).toList(),
+                ),
+                Positioned(
+                  bottom: height * 0.02,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: _imageUrls.asMap().entries.map((entry) {
+                      bool isSelected = _current == entry.key;
+                      return GestureDetector(
+                        onTap: () => _carouselController.animateToPage(entry.key),
+                        child: AnimatedContainer(
+                          width: isSelected ? 20.0 : 10.0,
+                          height: 10.0,
+                          margin: EdgeInsets.symmetric(horizontal: 4.0),
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.blue : Colors.grey,
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          duration: Duration(milliseconds: 300),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Positioned(
+                  left: 15.0,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black.withOpacity(0.2),
+                    child: IconButton(
+                      onPressed: () {
+                        _carouselController.previousPage();
+                      },
+                      icon: Icon(Icons.arrow_back_ios, size: 20.0, color: Colors.white),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 15.0,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black.withOpacity(0.2),
+                    child: IconButton(
+                      onPressed: () {
+                        _carouselController.nextPage();
+                      },
+                      icon: Icon(Icons.arrow_forward_ios, size: 20.0, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
   }
 }

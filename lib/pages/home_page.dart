@@ -38,15 +38,26 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       appBar: AppBar(
         title: Text('Home'),
-        actions: [
-          IconButton.filled(
-            onPressed: () => _logout(context), 
-            icon: const Icon(Icons.logout),
-            )
+        backgroundColor: Colors.deepOrange[400],
+        titleTextStyle: const TextStyle(
+          color: Colors.white, // Change the title text color
+          fontSize: 20.0, // Change the title text size
+          fontWeight: FontWeight.bold, // Change the title text weight
+        ),
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Change the color of the AppBar icons
+        ),
+       actions: [
+          IconButton(
+            onPressed: () => _logout(context),
+            icon: const Icon(Icons.logout, color: Colors.white), // Change the color of the icon
+          ),
         ],
         ),
+        
       body: FutureBuilder<String?>(
         future: _getUserRoll(),
         builder: (context, snapshot) {

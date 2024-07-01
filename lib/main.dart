@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: "Restaurant App",
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -26,8 +27,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/':(context)=>MainPage(),
-        '/login':(context)=>LoginPage(),
-        '/register':(context)=>RegisterPage(),
+        '/login':(context)=>const LoginPage(),
+        '/register':(context)=>const RegisterPage(),
         '/home':(context)=>HomePage(),
       },
     );
