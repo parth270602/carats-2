@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restaurantapp/components/Admin/approve_coupon_page.dart';
 import 'package:restaurantapp/components/Admin/control_carousal_page.dart';
 
 class AdminPage extends StatelessWidget {
@@ -8,12 +9,27 @@ class AdminPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const ControlCarousalPage()),);
-          },
-          child: const Text('Manage Carousel'),
-          ),
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ControlCarousalPage()),
+                );
+              },
+              child: const Text('Manage Carousel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const ApproveCouponsPage()),
+                  );
+              }, child: const Text('Approve Coupons'))
+          ],
+        ),
       ),
     );
   }
