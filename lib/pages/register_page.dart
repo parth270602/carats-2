@@ -31,7 +31,7 @@ class _RegisterPageState extends State<RegisterPage> {
       //Navigate to homeScreen or another screen
       Navigator.pushReplacement(
         context, 
-        MaterialPageRoute(builder: (context)=>HomePage())
+        MaterialPageRoute(builder: (context)=>const HomePage())
         );
 
 

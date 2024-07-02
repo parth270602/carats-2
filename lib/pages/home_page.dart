@@ -8,7 +8,7 @@ import 'package:restaurantapp/services/reward_service.dart';
 import 'package:restaurantapp/services/user_service.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: const Text('Home'),
         backgroundColor: Colors.deepOrange[400],
         titleTextStyle: const TextStyle(
           color: Colors.white,
@@ -83,9 +83,9 @@ class _HomePageState extends State<HomePage> {
           } else {
             String? roll = snapshot.data;
             if (roll == 'admin') {
-              return AdminPage();
+              return const AdminPage();
             } else if (roll == 'user') {
-              return UserPage();
+              return const UserPage();
             } else {
               return const Center(child: Text('Role not found'));
             }

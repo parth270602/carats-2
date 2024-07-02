@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ControlCarousalPage extends StatefulWidget {
+  const ControlCarousalPage({super.key});
+
   @override
   _ControlCarousalPageState createState() => _ControlCarousalPageState();
 }
@@ -18,7 +20,7 @@ class _ControlCarousalPageState extends State<ControlCarousalPage> {
         // Add additional fields if needed, such as timestamp, etc.
       }).then((value) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Image added successfully')),
+          const SnackBar(content: Text('Image added successfully')),
         );
         _imageUrlController.clear();
       }).catchError((error) {
@@ -32,7 +34,7 @@ class _ControlCarousalPageState extends State<ControlCarousalPage> {
   void _deleteImage(String docId) {
     _firestore.collection('carousel_images').doc(docId).delete().then((value) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Image deleted successfully')),
+        const SnackBar(content: Text('Image deleted successfully')),
       );
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -45,7 +47,7 @@ class _ControlCarousalPageState extends State<ControlCarousalPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Control Carousel'),
+        title: const Text('Control Carousel'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -54,30 +56,30 @@ class _ControlCarousalPageState extends State<ControlCarousalPage> {
           children: [
             TextField(
               controller: _imageUrlController,
-              decoration: InputDecoration(labelText: 'Image URL'),
+              decoration: const InputDecoration(labelText: 'Image URL'),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _addImage,
-              child: Text('Add Image'),
+              child: const Text('Add Image'),
             ),
-            SizedBox(height: 32.0),
-            Text(
+            const SizedBox(height: 32.0),
+            const Text(
               'Current Images:',
               style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             StreamBuilder<QuerySnapshot>(
               stream: _firestore.collection('carousel_images').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 }
                 if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Text('No images available');
+                  return const Text('No images available');
                 }
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,7 +89,7 @@ class _ControlCarousalPageState extends State<ControlCarousalPage> {
                     return ListTile(
                       title: Text(imageUrl),
                       trailing: IconButton(
-                        icon: Icon(Icons.delete),
+                        icon: const Icon(Icons.delete),
                         onPressed: () => _deleteImage(docId),
                       ),
                     );

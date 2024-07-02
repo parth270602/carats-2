@@ -1,62 +1,55 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class RewardService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> giveDailyReward() async {
-    final prefs = await SharedPreferences.getInstance();
-    String userId = _auth.currentUser!.uid;
-    DateTime now = DateTime.now();
-    String lastRewardDate = prefs.getString('lastRewardDate_$userId') ?? '';
+    User? user = _auth.currentUser;
+    if (user == null) return;
 
     try {
-      if (lastRewardDate != now.toIso8601String().split('T')[0]) {
-        int dailyCoins = Random().nextInt(21) + 10;
-        DocumentReference userDoc = _firestore.collection('users').doc(userId);
+      // Fetch min and max reward values
+      DocumentSnapshot settingsDoc = await _firestore.collection('settings').doc('rewards').get();
+      int minReward = int.parse(settingsDoc['minReward'].toString());
+      int maxReward = int.parse(settingsDoc['maxReward'].toString());
 
-        DocumentSnapshot snapshot = await userDoc.get();
+      // Generate a random reward between min and max values
+      Random random = Random();
+      int reward = minReward + random.nextInt(maxReward - minReward + 1);
+
+      // Update user's wallet balance and lastRewarded timestamp
+      DocumentReference userDoc = _firestore.collection('users').doc(user.uid);
+      await _firestore.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(userDoc);
         if (!snapshot.exists) {
-          throw Exception("User Doesn't exist");
+          throw Exception("User does not exist!");
         }
 
-        // Accessing wallet balance safely using type checks and casts
-        dynamic userData = snapshot.data();
-        if (userData != null && userData['wallet'] != null) {
-          Map<String, dynamic> walletData = userData['wallet'];
-          int currentBalance = walletData['balance'] ?? 0;
+        int currentBalance = snapshot['wallet']['balance'];
+        Timestamp? lastRewarded = snapshot['lastRewarded'];
+        DateTime now = DateTime.now();
 
-          int newBalance = currentBalance + dailyCoins;
-
-          // Prepare update data
-          Map<String, dynamic> updateData = {
-            'wallet.balance': newBalance,
-          };
-
-          // Add rewards history using server timestamp in a map
-          updateData['wallet.rewardsHistory'] = FieldValue.arrayUnion([
-            {
-              'coins': dailyCoins,
-              'date': Timestamp.now(), // Use Timestamp.now() instead of FieldValue.serverTimestamp()
-              'type': 'daily'
-            }
-          ]);
-
-          await userDoc.update(updateData);
-
-          prefs.setString('lastRewardDate_$userId', now.toIso8601String().split('T')[0]);
-        } else {
-          throw Exception("User data or wallet data not found");
+        // Check if the user has already received the reward today
+        if (lastRewarded != null) {
+          DateTime lastRewardedDate = lastRewarded.toDate();
+          if (lastRewardedDate.year == now.year &&
+              lastRewardedDate.month == now.month &&
+              lastRewardedDate.day == now.day) {
+            throw Exception("Daily reward already redeemed today");
+          }
         }
-      } else {
-        print('User already received daily rewards today.');
-      }
+
+        transaction.update(userDoc, {
+          'wallet.balance': currentBalance + reward,
+          'lastRewarded': now,
+        });
+      });
     } catch (e) {
       print('Error giving daily reward: $e');
-      throw e; // Rethrow the exception to handle it further up the call stack if needed
+      throw e;
     }
   }
 }

@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class CarousalPage extends StatefulWidget {
+  const CarousalPage({super.key});
+
   @override
   _CarousalPageState createState() => _CarousalPageState();
 }
@@ -36,7 +38,7 @@ class _CarousalPageState extends State<CarousalPage> {
     double height = MediaQuery.of(context).size.height;
 
     return _imageUrls.isEmpty
-        ? CircularProgressIndicator()
+        ? const CircularProgressIndicator()
         : SizedBox(
             height: height * 0.3,  // Set a fixed height
             child: Stack(
@@ -74,12 +76,12 @@ class _CarousalPageState extends State<CarousalPage> {
                         child: AnimatedContainer(
                           width: isSelected ? 20.0 : 10.0,
                           height: 10.0,
-                          margin: EdgeInsets.symmetric(horizontal: 4.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 4.0),
                           decoration: BoxDecoration(
                             color: isSelected ? Colors.blue : Colors.grey,
                             borderRadius: BorderRadius.circular(10.0),
                           ),
-                          duration: Duration(milliseconds: 300),
+                          duration: const Duration(milliseconds: 300),
                         ),
                       );
                     }).toList(),
@@ -93,7 +95,7 @@ class _CarousalPageState extends State<CarousalPage> {
                       onPressed: () {
                         _carouselController.previousPage();
                       },
-                      icon: Icon(Icons.arrow_back_ios, size: 20.0, color: Colors.white),
+                      icon: const Icon(Icons.arrow_back_ios, size: 20.0, color: Colors.white),
                     ),
                   ),
                 ),
@@ -105,7 +107,7 @@ class _CarousalPageState extends State<CarousalPage> {
                       onPressed: () {
                         _carouselController.nextPage();
                       },
-                      icon: Icon(Icons.arrow_forward_ios, size: 20.0, color: Colors.white),
+                      icon: const Icon(Icons.arrow_forward_ios, size: 20.0, color: Colors.white),
                     ),
                   ),
                 ),

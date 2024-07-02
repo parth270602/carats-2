@@ -3,21 +3,23 @@ import 'package:restaurantapp/components/User/carousal_page.dart';
 import 'package:restaurantapp/components/User/rewards_page.dart';
 
 class UserPage extends StatelessWidget {
+  const UserPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          CarousalPage(),
-          SizedBox(height: 20),
+          const CarousalPage(),
+          const SizedBox(height: 20),
           ElevatedButton(
             onPressed:() {
               Navigator.push(
                 context, 
-                MaterialPageRoute(builder: (context)=> RewardsPage()),
+                MaterialPageRoute(builder: (context)=> const RewardsPage()),
                 );
             } , 
-            child: Text('View Rewards'))
+            child: const Text('View Rewards'))
         ],
       ),
     );
