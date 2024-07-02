@@ -4,18 +4,35 @@ import 'package:flutter/material.dart';
 import 'package:restaurantapp/components/Admin/admin_page.dart';
 import 'package:restaurantapp/components/User/user_page.dart';
 import 'package:restaurantapp/pages/login_page.dart';
+import 'package:restaurantapp/services/reward_service.dart';
+import 'package:restaurantapp/services/user_service.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  HomePage({Key? key}) : super(key: key);
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final RewardService _rewardService = RewardService();
+  final UserService _userService = UserService();
 
-  HomePage({Key? key}) : super(key: key);
+  @override
+  void initState() {
+    super.initState();
+    _rewardService.giveDailyReward();
+  }
 
   Future<String?> _getUserRoll() async {
     User? user = _auth.currentUser;
     if (user == null) {
       return null;
     }
+
+    await _userService.checkAndCreateWallet(user);
 
     DocumentSnapshot doc = await _firestore.collection('users').doc(user.uid).get();
     Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
@@ -27,37 +44,35 @@ class HomePage extends StatelessWidget {
     }
   }
 
-  void _logout (BuildContext context)async{
+  void _logout(BuildContext context) async {
     await _auth.signOut();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
-      );
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(
         title: Text('Home'),
         backgroundColor: Colors.deepOrange[400],
         titleTextStyle: const TextStyle(
-          color: Colors.white, // Change the title text color
-          fontSize: 20.0, // Change the title text size
-          fontWeight: FontWeight.bold, // Change the title text weight
+          color: Colors.white,
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
         ),
         iconTheme: const IconThemeData(
-          color: Colors.white, // Change the color of the AppBar icons
+          color: Colors.white,
         ),
-       actions: [
+        actions: [
           IconButton(
             onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout, color: Colors.white), // Change the color of the icon
+            icon: const Icon(Icons.logout, color: Colors.white),
           ),
         ],
-        ),
-        
+      ),
       body: FutureBuilder<String?>(
         future: _getUserRoll(),
         builder: (context, snapshot) {
@@ -72,7 +87,7 @@ class HomePage extends StatelessWidget {
             } else if (roll == 'user') {
               return UserPage();
             } else {
-              return Center(child: Text('Role not found'));
+              return const Center(child: Text('Role not found'));
             }
           }
         },

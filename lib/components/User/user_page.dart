@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurantapp/components/User/carousal_page.dart';
+import 'package:restaurantapp/components/User/rewards_page.dart';
 
 class UserPage extends StatelessWidget {
   @override
@@ -7,8 +8,16 @@ class UserPage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
-          CarousalPage(), // Call the reusable carousel widget here
-          // Add other content for UserPage here
+          CarousalPage(),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed:() {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context)=> RewardsPage()),
+                );
+            } , 
+            child: Text('View Rewards'))
         ],
       ),
     );
