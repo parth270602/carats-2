@@ -2,43 +2,46 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HistoryService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<List<Map<String, dynamic>>> getTransactionHistory() async {
-    String userId = _auth.currentUser!.uid;
+    User? user = _auth.currentUser;
+    if (user == null) return [];
 
-    // Fetch ledger transactions
-    QuerySnapshot ledgerSnapshot = await _firestore
-        .collection('users/$userId/ledger')
-        .orderBy('date', descending: true)
-        .get();
+    List<Map<String, dynamic>> transactions = [];
 
-    // Combine ledger data with coupon status
-    List<Map<String, dynamic>> transactions = await Future.wait(
-      ledgerSnapshot.docs.map((ledgerDoc) async {
-        Map<String, dynamic> ledgerData = ledgerDoc.data() as Map<String, dynamic>;
+    try {
+      QuerySnapshot ledgerSnapshot = await _firestore
+          .collection('users/${user.uid}/ledger')
+          .orderBy('date', descending: true)
+          .get();
 
-        if (ledgerData['type'] == 'coupon') {
-          // Extract coupon code from description
-          RegExp regex = RegExp(r'\(Code: (\w+)\)');
-          Match? match = regex.firstMatch(ledgerData['description']);
-          String? couponCode = match?.group(1);
+      for (var doc in ledgerSnapshot.docs) {
+        var transaction = doc.data() as Map<String, dynamic>;
 
-          if (couponCode != null) {
-            // Fetch coupon status
-            DocumentSnapshot couponDoc = await _firestore
-                .collection('users/$userId/coupons')
-                .doc(couponCode)
+        if (transaction['type'] == 'redeem') {
+          String? userId = transaction['userId'] as String?;
+          if (userId != null) {
+            DocumentSnapshot requestSnapshot = await _firestore
+                .collection('users/${user.uid}/redeemRequests')
+                .doc(userId)
                 .get();
-
-            ledgerData['status'] = couponDoc.exists ? (couponDoc.data() as Map<String, dynamic>)['status'] : 'unknown';
+            if (requestSnapshot.exists) {
+              transaction['status'] = requestSnapshot['status'] ?? 'Unknown';
+              
+            } else {
+              transaction['status'] = 'Unknown';
+            }
+          } else {
+            transaction['status'] = 'Unknown';
           }
         }
-
-        return ledgerData;
-      }).toList(),
-    );
+        transactions.add(transaction);
+      }
+    } catch (e) {
+      print(e);
+    }
 
     return transactions;
   }

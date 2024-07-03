@@ -1,17 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'redeem_service.dart';
 
 class AdminService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final RedeemService _redeemService = RedeemService();
 
-  Future<void> approveCoupon(String userId, String couponCode) async {
-    DocumentReference userDoc = _firestore.collection('users').doc(userId);
-    DocumentReference couponDoc = userDoc.collection('coupons').doc(couponCode);
-
-    DocumentSnapshot couponSnapshot = await couponDoc.get();
-    if (!couponSnapshot.exists) {
-      throw Exception('Coupon Doesnt Exist');
-    }
-
-    await couponDoc.update({'status': 'approved'});
+  Future<void> approveRedemption(String userId, String requestId) async {
+    await _redeemService.approveRedeem(requestId, userId);
   }
 }

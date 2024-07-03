@@ -85,11 +85,6 @@ class _RewardsPageState extends State<RewardsPage> {
           style: const TextStyle(fontSize: 24),
         ),
         const SizedBox(height: 20),
-        Text(
-          'Daily Reward Range: $minReward - $maxReward coins',
-          style: const TextStyle(fontSize: 18),
-        ),
-        const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () {
             _redeemDailyRewards();

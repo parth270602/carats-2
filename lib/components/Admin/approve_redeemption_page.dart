@@ -2,39 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:restaurantapp/services/admin_service.dart';
 
-class ApproveCouponsPage extends StatefulWidget {
-  const ApproveCouponsPage({super.key});
+class ApproveRedemptionsPage extends StatefulWidget {
+  const ApproveRedemptionsPage({super.key});
 
   @override
-  State<ApproveCouponsPage> createState() => _ApproveCouponsPageState();
+  State<ApproveRedemptionsPage> createState() => _ApproveRedemptionsPageState();
 }
 
-class _ApproveCouponsPageState extends State<ApproveCouponsPage> {
+class _ApproveRedemptionsPageState extends State<ApproveRedemptionsPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AdminService _adminService = AdminService();
 
-  Future<List<Map<String, dynamic>>> _fetchPendingCoupons() async {
-    QuerySnapshot snapshot = await _firestore.collectionGroup('coupons')
+  Future<List<Map<String, dynamic>>> _fetchPendingRedemptions() async {
+    QuerySnapshot snapshot = await _firestore.collectionGroup('redeemRequests')
       .where('status', isEqualTo: 'pending')
       .orderBy('date')
       .get();
     return snapshot.docs.map((doc) {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
       data['userId'] = doc.reference.parent.parent!.id;
+      data['requestId'] = doc.id;
       return data;
     }).toList();
   }
 
-  void _approveCoupon(String userId, String couponCode) async {
+  void _approveRedemption(String userId, String requestId, int amount) async {
     try {
-      await _adminService.approveCoupon(userId, couponCode);
+      await _adminService.approveRedemption(userId, requestId);
       setState(() {}); // Refresh the list after approval
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Coupon approved successfully!')),
+        const SnackBar(content: Text('Redemption approved successfully!')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to approve coupon: $e')),
+        SnackBar(content: Text('Failed to approve redemption: $e')),
       );
     }
   }
@@ -43,27 +44,27 @@ class _ApproveCouponsPageState extends State<ApproveCouponsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Approve Coupons'),
+        title: const Text('Approve Redemptions'),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _fetchPendingCoupons(),
+        future: _fetchPendingRedemptions(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            List<Map<String, dynamic>> pendingCoupons = snapshot.data!;
+            List<Map<String, dynamic>> pendingRedemptions = snapshot.data!;
             return ListView.builder(
-              itemCount: pendingCoupons.length,
+              itemCount: pendingRedemptions.length,
               itemBuilder: (context, index) {
-                Map<String, dynamic> coupon = pendingCoupons[index];
+                Map<String, dynamic> redemption = pendingRedemptions[index];
                 return ListTile(
-                  title: Text('${coupon['type']} Coupon'),
-                  subtitle: Text('Code: ${coupon['code']}'),
+                  title: Text('Redeem ${redemption['amount']} coins'),
+                  subtitle: Text('User ID: ${redemption['userId']}'),
                   trailing: ElevatedButton(
                     onPressed: () {
-                      _approveCoupon(coupon['userId'], coupon['code']);
+                      _approveRedemption(redemption['userId'], redemption['requestId'], redemption['amount']);
                     },
                     child: const Text('Approve'),
                   ),

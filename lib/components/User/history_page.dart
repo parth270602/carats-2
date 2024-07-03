@@ -25,19 +25,19 @@ class _HistoryPageState extends State<HistoryPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            List<Map<String, dynamic>> transactions = snapshot.data!;
+            List<Map<String, dynamic>> transactions = snapshot.data ?? [];
             return ListView.builder(
               itemCount: transactions.length,
               itemBuilder: (context, index) {
                 Map<String, dynamic> transaction = transactions[index];
-                bool isCoupon = transaction['type'] == 'coupon';
+                bool isRedeem = transaction['type'] == 'redeem';
                 return ListTile(
                   title: Text(transaction['description']),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(transaction['date'].toDate().toString()),
-                      if (isCoupon) Text('Status: ${transaction['status']}'),
+                      if (isRedeem) Text('Status: ${transaction['status']}'),
                     ],
                   ),
                   trailing: Text('${transaction['amount']} coins'),

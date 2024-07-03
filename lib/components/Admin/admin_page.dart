@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:restaurantapp/components/Admin/approve_coupon_page.dart';
+import 'package:restaurantapp/components/Admin/approve_redeemption_page.dart';
 import 'package:restaurantapp/components/Admin/control_carousal_page.dart';
 
 class AdminPage extends StatelessWidget {
@@ -25,7 +25,7 @@ class AdminPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context, 
-                  MaterialPageRoute(builder: (context) => const ApproveCouponsPage()),
+                  MaterialPageRoute(builder: (context) => const ApproveRedemptionsPage()),
                   );
               }, child: const Text('Approve Coupons'))
           ],
