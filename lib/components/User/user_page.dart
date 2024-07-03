@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurantapp/components/User/carousal_page.dart';
+import 'package:restaurantapp/components/User/history_page.dart';
 import 'package:restaurantapp/components/User/rewards_page.dart';
 import 'package:restaurantapp/pages/coupon_page.dart';
 
@@ -32,6 +33,16 @@ class UserPage extends StatelessWidget {
               }, 
               child: const Text("Redeem Coupon")
               ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HistoryPage()),
+                    );
+                }, 
+                child: const Text("Transaction History")),
+
         ],
       ),
     );

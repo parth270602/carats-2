@@ -34,6 +34,7 @@ class CouponService {
 
       int newBalance = currentBalance - coinCost;
       String couponCode = _generateCouponCode();
+      print(newBalance);
 
       await _firestore.runTransaction((transaction) async {
         // Update user's balance
@@ -46,7 +47,7 @@ class CouponService {
           'amount': coinCost,
           'date': Timestamp.now(),
           'type': 'coupon',
-          'description': '$couponType coupon purchased',
+          'description': '$couponType coupon purchased (Code: $couponCode)',
         });
 
         // Add coupon
