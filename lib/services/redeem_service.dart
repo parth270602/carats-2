@@ -35,7 +35,7 @@ class RedeemService {
         'status': 'pending',
         'userId': userId,
       });
-      
+
       // Ledger entry for user
       await _firestore.collection('users/$userId/ledger').add({
         'amount': coinAmount,
@@ -64,34 +64,42 @@ class RedeemService {
               .get())
           .data()?['amount'] ?? 0;
 
-      // Update Redeem request status
-      await _firestore
-          .collection('users/$userId/redeemRequests')
-          .doc(requestId)
-          .update({
-        'status': 'approved',
+      // Start a transaction to ensure atomicity
+      await _firestore.runTransaction((transaction) async {
+        // Update Redeem request status
+        DocumentReference redeemRequestDoc = _firestore
+            .collection('users/$userId/redeemRequests')
+            .doc(requestId);
+        transaction.update(redeemRequestDoc, {
+          'status': 'approved',
+        });
+
+        // Fetch admin details
+        QuerySnapshot adminSnapshot = await _firestore
+            .collection('users')
+            .where('roll', isEqualTo: 'admin')
+            .get();
+
+        for (var admin in adminSnapshot.docs) {
+          int adminBalance = admin['wallet']['balance'] ?? 0;
+          int newAdminBalance = adminBalance + coinAmount;
+
+          // Update admin balance
+          DocumentReference adminDoc = _firestore.collection('users').doc(admin.id);
+          transaction.update(adminDoc, {
+            'wallet.balance': newAdminBalance,
+          });
+
+          // Ledger entry for admin
+          DocumentReference adminLedgerDoc = _firestore.collection('users/${admin.id}/ledger').doc();
+          transaction.set(adminLedgerDoc, {
+            'amount': coinAmount,
+            'date': Timestamp.now(),
+            'type': 'redeem',
+            'description': 'Coins received from ${userData['email']}',
+          });
+        }
       });
-
-      // Transfer coins to admin
-      QuerySnapshot adminSnapshot = await _firestore
-          .collection('users')
-          .where('role', isEqualTo: 'admin')
-          .get();
-      for (var admin in adminSnapshot.docs) {
-        int adminBalance = admin['wallet']['balance'] ?? 0;
-        int newAdminBalance = adminBalance + coinAmount;
-        await _firestore.collection('users').doc(admin.id).update({
-          'wallet.balance': newAdminBalance,
-        });
-
-        // Ledger entry for admin
-        await _firestore.collection('users/${admin.id}/ledger').add({
-          'amount': coinAmount,
-          'date': Timestamp.now(),
-          'type': 'redeem',
-          'description': 'Coins received from ${userData['email']}',
-        });
-      }
     } else {
       throw Exception("User not found");
     }

@@ -116,6 +116,9 @@ class _RedeemPageState extends State<RedeemPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Redeem Coins'),
+      ),
       body:FutureBuilder<Map<String,dynamic>?>(
         future:_getUserData(),
         builder:(context,snapshot){
