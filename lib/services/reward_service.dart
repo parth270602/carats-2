@@ -56,7 +56,8 @@ class RewardService {
       }
     } catch (e) {
       print('Error giving daily reward: $e');
-      throw e; // Rethrow the exception to handle it further up the call stack if needed
+      throw e; // Rethrow the exception to handle it further up the call stack if neede
+      //asdadadass
     }
   }
 }
