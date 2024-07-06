@@ -2,6 +2,8 @@ import "package:firebase_auth/firebase_auth.dart";
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurantapp/pages/home_page.dart';
+import "package:google_sign_in/google_sign_in.dart";
+
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -39,6 +41,42 @@ class _RegisterPageState extends State<RegisterPage> {
       print(e);
     }
   }
+   Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      if (user != null) {
+        //check if user data already exisits
+        DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
+
+        if (!userDoc.exists) {
+          await _firestore.collection('users').doc(user.uid).set({
+            'email': user.email,
+            'roll': 'user',
+          });
+        }
+      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
 
 
 
@@ -62,6 +100,10 @@ class _RegisterPageState extends State<RegisterPage> {
             ElevatedButton(
               onPressed: _register, 
               child: const Text('Register')
+              ),
+                ElevatedButton(
+                onPressed: _signInWithGoogle,
+                child:const Text("Signup With Google"),
               ),
               TextButton(
                 onPressed: (){
