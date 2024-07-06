@@ -39,9 +39,11 @@ class RedeemService {
       // Ledger entry for user
       await _firestore.collection('users/$userId/ledger').add({
         'amount': coinAmount,
+
         'date': Timestamp.now(),
         'type': 'redeem',
-        'description': 'Coin redeem requested'
+        'description': 'Coin redeem requested',
+        'userId':userId
       });
     } else {
       throw Exception("User data not found");
