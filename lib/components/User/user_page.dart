@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restaurantapp/components/User/bill_history_page.dart';
 import 'package:restaurantapp/components/User/carousal_page.dart';
 import 'package:restaurantapp/components/User/history_page.dart';
 import 'package:restaurantapp/components/User/rewards_page.dart';
@@ -53,6 +54,18 @@ class UserPage extends StatelessWidget {
                     );
                 },
                child: const Text('Upload Bill')
+               ),
+
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => const BillPage()),
+                    );
+                },
+               child: const Text('Bills History')
                )
         ],
       ),
