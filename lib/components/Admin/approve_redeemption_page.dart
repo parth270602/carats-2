@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:restaurantapp/services/admin_service.dart';
+import 'package:restaurantapp/services/reject_redeem_service.dart';
 
 class ApproveRedemptionsPage extends StatefulWidget {
   const ApproveRedemptionsPage({super.key});
@@ -12,6 +13,7 @@ class ApproveRedemptionsPage extends StatefulWidget {
 class _ApproveRedemptionsPageState extends State<ApproveRedemptionsPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AdminService _adminService = AdminService();
+  final RejectRedeemService _rejectRedeemService = RejectRedeemService();
 
   Future<List<Map<String, dynamic>>> _fetchPendingRedemptions() async {
     QuerySnapshot snapshot = await _firestore.collectionGroup('redeemRequests')
@@ -40,6 +42,48 @@ class _ApproveRedemptionsPageState extends State<ApproveRedemptionsPage> {
     }
   }
 
+  void _rejectRedemption(String userId, String requestId) async {
+    TextEditingController reasonController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Reject Redemption'),
+          content: TextField(
+            controller: reasonController,
+            decoration: const InputDecoration(
+              hintText: 'Enter reason for rejection',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await _rejectRedeemService.rejectRedeem(requestId, userId, reasonController.text);
+                  Navigator.pop(context);
+                  setState(() {}); // Refresh the list after rejection
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Redemption rejected successfully!')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to reject redemption: $e')),
+                  );
+                }
+              },
+              child: const Text('Reject'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,11 +106,24 @@ class _ApproveRedemptionsPageState extends State<ApproveRedemptionsPage> {
                 return ListTile(
                   title: Text('Redeem ${redemption['amount']} coins'),
                   subtitle: Text('User ID: ${redemption['userId']}'),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      _approveRedemption(redemption['userId'], redemption['requestId'], redemption['amount']);
-                    },
-                    child: const Text('Approve'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          _approveRedemption(redemption['userId'], redemption['requestId'], redemption['amount']);
+                        },
+                        child: const Text('Approve'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          _rejectRedemption(redemption['userId'], redemption['requestId']);
+                        },
+                        child: const Text('Reject'),
+                       
+                      ),
+                    ],
                   ),
                 );
               },
