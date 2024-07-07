@@ -1,18 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ImageDetailPage extends StatelessWidget {
   final String imageUrl;
   final String uploaderEmail;
   final String uploadedAt;
+  final String comments;
 
   const ImageDetailPage({
     required this.imageUrl,
     required this.uploaderEmail,
     required this.uploadedAt,
-    Key? key,
-  }):super(key:key);
+    required this.comments,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +29,8 @@ class ImageDetailPage extends StatelessWidget {
             Text("Uploaded By: $uploaderEmail",style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 8),
             Text("Uploaded At:$uploadedAt", style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 8),
+            Text("User Comments: $comments" ,style:const TextStyle(fontSize: 18))
           ],
         ),
         ),

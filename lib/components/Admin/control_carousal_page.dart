@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ControlCarousalPage extends StatefulWidget {
-  const ControlCarousalPage({super.key});
+  const ControlCarousalPage({Key? key}) : super(key: key);
 
   @override
   _ControlCarousalPageState createState() => _ControlCarousalPageState();
@@ -15,7 +15,7 @@ class _ControlCarousalPageState extends State<ControlCarousalPage> {
   void _addImage() {
     String imageUrl = _imageUrlController.text.trim();
     if (imageUrl.isNotEmpty) {
-      _firestore.collection('carousal').add({
+      _firestore.collection('carousel').add({
         'imageUrl': imageUrl,
         // Add additional fields if needed, such as timestamp, etc.
       }).then((value) {
@@ -32,7 +32,7 @@ class _ControlCarousalPageState extends State<ControlCarousalPage> {
   }
 
   void _deleteImage(String docId) {
-    _firestore.collection('carousel_images').doc(docId).delete().then((value) {
+    _firestore.collection('carousel').doc(docId).delete().then((value) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Image deleted successfully')),
       );
@@ -70,7 +70,7 @@ class _ControlCarousalPageState extends State<ControlCarousalPage> {
             ),
             const SizedBox(height: 16.0),
             StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('carousel_images').snapshots(),
+              stream: _firestore.collection('carousel').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();

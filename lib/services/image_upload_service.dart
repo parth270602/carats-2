@@ -6,31 +6,30 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class ImageUploadService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final ImagePicker _picker = ImagePicker();
+  String? _uploadedImageUrl;
+  File? _selectedImage;
 
-  Future<void> pickAndUploadImage(BuildContext context) async {
+  File? get selectedImage => _selectedImage;
+
+  Future<void> pickImage(BuildContext context, ImageSource source) async {
     try {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      final pickedFile = await _picker.pickImage(source: source);
       if (pickedFile == null) return;
 
-      File? croppedFile = await _cropImage(pickedFile.path);
-      if (croppedFile == null) return;
-
-      String? downloadUrl = await _uploadImage(croppedFile);
-      if (downloadUrl != null) {
-        await _saveImageUrlToFirestore(downloadUrl);
+      _selectedImage = await _cropImage(pickedFile.path);
+      if (_selectedImage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Image uploaded successfully!')),
+          const SnackBar(content: Text('Image loaded successfully!')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload image: $e')),
+        SnackBar(content: Text('Failed to load image: $e')),
       );
     }
   }
@@ -71,16 +70,25 @@ class ImageUploadService {
     }
   }
 
-  Future<void> _saveImageUrlToFirestore(String downloadUrl) async {
+  Future<void> submitReview(String review) async {
+    if (_selectedImage == null) return;
+
+    _uploadedImageUrl = await _uploadImage(_selectedImage!);
+    if (_uploadedImageUrl == null) return;
+
     User? user = _auth.currentUser;
     if (user == null) return;
 
     await _firestore.collection('images').add({
-      'url': downloadUrl,
+      'url': _uploadedImageUrl,
       'approved': false,
       'userId': user.uid,
-      'email':user.email,
+      'email': user.email,
+      'review': review,
+      'rejectionReason': 'Bill Approved',
       'uploadedAt': FieldValue.serverTimestamp(),
     });
+
+    _selectedImage = null; // Clear the selected image after upload
   }
 }
