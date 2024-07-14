@@ -135,7 +135,6 @@ class _AdminImageApprovalPageState extends State<AdminImageApprovalPage> {
                           imageUrl: image['url'],
                           uploaderEmail: image['email'],
                           uploadedAt: formattedDate,
-                          comments: image['review'],
                         ),
                       ),
                     );
