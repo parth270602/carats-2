@@ -5,6 +5,7 @@ import 'package:restaurantapp/components/User/bill_details_page.dart';
 import 'package:restaurantapp/components/User/comment_widget.dart';
 import 'package:restaurantapp/services/bill_history.dart';
 
+
 class BillPage extends StatefulWidget {
   const BillPage({super.key});
 
@@ -77,10 +78,12 @@ class _BillPageState extends State<BillPage> {
                                           status: bill['approved'],
                                           adminComments:
                                               bill['rejectionReason'],
+                                              
                                         )),
                               );
                             },
                             leading: Image.network(bill['url']),
+
                             title: Text('Uploaded Date: $formattedDate'),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

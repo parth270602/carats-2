@@ -55,24 +55,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        backgroundColor: Colors.deepOrange[400],
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 20.0,
-          fontWeight: FontWeight.bold,
-        ),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout, color: Colors.white),
-          ),
-        ],
-      ),
+      
       body: FutureBuilder<String?>(
         future: _getUserRoll(),
         builder: (context, snapshot) {
@@ -83,15 +66,17 @@ class _HomePageState extends State<HomePage> {
           } else {
             String? roll = snapshot.data;
             if (roll == 'admin') {
-              return const AdminPage();
+              return AdminPage();
             } else if (roll == 'user') {
-              return const UserPage();
+              return  UserPage();
             } else {
               return const Center(child: Text('Role not found'));
             }
           }
         },
-      ),
-    );
+      
+      ),      
+       
+     );
   }
 }

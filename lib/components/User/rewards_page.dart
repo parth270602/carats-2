@@ -1,7 +1,9 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:restaurantapp/services/reward_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RewardsPage extends StatefulWidget {
   const RewardsPage({super.key});
@@ -14,6 +16,32 @@ class _RewardsPageState extends State<RewardsPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final RewardService _rewardService = RewardService();
+  final ConfettiController _confettiController = ConfettiController(duration: const Duration(seconds: 2));
+
+  bool _rewardCollected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkRewardStatus();
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkRewardStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    String userId = _auth.currentUser?.uid ?? '';
+    DateTime now = DateTime.now();
+    String lastRewardDate = prefs.getString('lastRewardDate_$userId') ?? '';
+
+    setState(() {
+      _rewardCollected = lastRewardDate == now.toIso8601String().split('T')[0];
+    });
+  }
 
   Future<Map<String, dynamic>?> _getUserRewards() async {
     User? user = _auth.currentUser;
@@ -41,23 +69,36 @@ class _RewardsPageState extends State<RewardsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: Future.wait([_getUserRewards(), _getRewardSettings()]).then((values) {
-          return {
-            'user': values[0],
-            'settings': values[1],
-          };
-        }),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return _buildRewardsUI(snapshot.data);
-          }
-        },
+      body: Stack(
+        children: [
+          FutureBuilder<Map<String, dynamic>?>(
+            future: Future.wait([_getUserRewards(), _getRewardSettings()]).then((values) {
+              return {
+                'user': values[0],
+                'settings': values[1],
+              };
+            }),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else {
+                return _buildRewardsUI(snapshot.data);
+              }
+            },
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+            ),
+          )
+        ],
       ),
+      
     );
   }
 
@@ -86,13 +127,14 @@ class _RewardsPageState extends State<RewardsPage> {
         ),
         const SizedBox(height: 20),
         ElevatedButton(
-          onPressed: () {
+          onPressed: _rewardCollected ? null : () {
             _redeemDailyRewards();
           },
           child: const Text('Get Today\'s Rewards'),
         ),
       ],
     );
+    
   }
 
   void _redeemDailyRewards() {
@@ -100,7 +142,10 @@ class _RewardsPageState extends State<RewardsPage> {
     if (user == null) return;
 
     _rewardService.giveDailyReward().then((_) {
-      setState(() {});
+      setState(() {
+        _rewardCollected = true;
+        _confettiController.play();
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Daily rewards redeemed successfully!')),
       );
