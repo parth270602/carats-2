@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:restaurantapp/pages/custom_aapbar.dart';
+import 'package:restaurantapp/pages/drawer_page.dart';
 import 'package:restaurantapp/services/history_service.dart';
 
 class HistoryPage extends StatefulWidget {
@@ -14,9 +16,10 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Transaction History'),
+       appBar: CustomAppBar(
+        title: "CARATS",
       ),
+      drawer: const DrawerPage(),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _historyService.getTransactionHistory(),
         builder: (context, snapshot) {

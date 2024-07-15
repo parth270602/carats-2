@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:restaurantapp/pages/custom_aapbar.dart';
+import 'package:restaurantapp/pages/drawer_page.dart';
 import 'package:restaurantapp/services/image_upload_service.dart';
 
 class UploadBillPage extends StatefulWidget {
@@ -13,6 +16,8 @@ class _UploadBillPageState extends State<UploadBillPage> {
   final ImageUploadService _imageUploadService = ImageUploadService();
   final TextEditingController _reviewController = TextEditingController();
   bool _isUploading = false;
+  String? _selectedValue;
+  List<String> items=["Dine In","Zomato","Swiggy"];
 
   Future<void> _pickImage(ImageSource source) async {
     setState(() {
@@ -85,9 +90,12 @@ class _UploadBillPageState extends State<UploadBillPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Upload Bill Image'),
+       appBar: CustomAppBar(
+        title: "CARATS",
+        centerTitle: false,
+        backgroundColor: const Color(0xFFC0392B),
       ),
+      drawer: const DrawerPage(),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -110,8 +118,27 @@ class _UploadBillPageState extends State<UploadBillPage> {
               padding: const EdgeInsets.all(8.0),
               child: TextField(
                 controller: _reviewController,
-                decoration: const InputDecoration(labelText: "Enter your Review"),
+                decoration: const InputDecoration(labelText: "Enter your Comments"),
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                hint:Text("Select an option"),
+                value:_selectedValue,
+                onChanged: (String? newValue){
+                  setState(() {
+                    _selectedValue=newValue;
+                  });
+                },
+                items:items.map<DropdownMenuItem<String>>((String value){
+                  return DropdownMenuItem<String>(
+                    value:value,
+                    child:Text(value),
+                  );
+                }).toList()
+                ),
             ),
             ElevatedButton(
               onPressed: _isUploading ? null : _submitReview,

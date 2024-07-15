@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:restaurantapp/components/User/bill_details_page.dart';
 import 'package:restaurantapp/components/User/comment_widget.dart';
+import 'package:restaurantapp/pages/custom_aapbar.dart';
+import 'package:restaurantapp/pages/drawer_page.dart';
 import 'package:restaurantapp/services/bill_history.dart';
 
 
@@ -42,9 +44,8 @@ class _BillPageState extends State<BillPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bill History'),
-      ),
+      appBar: CustomAppBar(title: "CARATS"),
+      drawer: DrawerPage(),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _bills.isEmpty

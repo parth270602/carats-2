@@ -6,9 +6,10 @@ import 'package:restaurantapp/services/menu_upload_page.dart';
 
 
 class MenuUploaderPage extends StatefulWidget {
-  MenuUploaderPage({Key? key}) : super(key: key);
+  const MenuUploaderPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _MenuUploaderPageState createState() => _MenuUploaderPageState();
 }
 
@@ -25,7 +26,7 @@ class _MenuUploaderPageState extends State<MenuUploaderPage> {
 
     List<XFile>? images = await picker.pickMultiImage();
 
-    if (images != null && images.isNotEmpty) {
+    if (images.isNotEmpty) {
       // Convert XFile to File
       List<File> imageFiles = images.map((image) => File(image.path)).toList();
       await imageUploader.uploadImages(imageFiles);

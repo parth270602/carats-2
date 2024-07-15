@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:restaurantapp/pages/custom_aapbar.dart';
+import 'package:restaurantapp/pages/drawer_page.dart';
 
 class MenuPage extends StatelessWidget {
   MenuPage({super.key});
@@ -11,10 +13,11 @@ class MenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Menu'),
-
-      ),body: StreamBuilder(
+       appBar: CustomAppBar(
+        title: "CARATS",
+      ),
+      drawer: const DrawerPage(),
+      body: StreamBuilder(
         stream: _firestore.collection('menu').snapshots(),
         builder: (context,AsyncSnapshot<QuerySnapshot> snapshot){
           if(snapshot.hasError){

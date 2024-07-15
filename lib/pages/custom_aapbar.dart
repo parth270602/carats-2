@@ -43,5 +43,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
         ],
       backgroundColor: widget.backgroundColor ?? const Color(0xFFC0392B),
     );
+    
   }
 }
